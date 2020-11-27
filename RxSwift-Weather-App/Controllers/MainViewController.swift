@@ -69,6 +69,16 @@ class MainViewController: UIViewController {
         return label
     }()
     
+    let conditionImageView = UIImageView()
+    
+    let descriptionLabel: UILabel = {
+        let label = UILabel()
+        label.font = UIFont.systemFont(ofSize: 30, weight: .light)
+        label.textAlignment = .left
+        label.textColor = .black
+        return label
+    }()
+    
     //MARK: - Lifecycle
     
     override func viewDidLoad() {
@@ -134,16 +144,37 @@ class MainViewController: UIViewController {
         search.map {"City: \($0.name)"}
             .drive(self.cityNameLabel.rx.text)
             .disposed(by: disposeBag)
+        
+        search.map {"Description: \($0.weather[0].main)"}
+            .drive(self.descriptionLabel.rx.text)
+            .disposed(by: disposeBag)
+        
+        search.map { result in
+            self.getImage(string: result.weather[0].conditionName)
+        }
+        .drive(self.conditionImageView.rx.image)
+        .disposed(by: disposeBag)
     }
+    
+    func getImage(string: String) -> UIImage {
+        let image = UIImage(systemName: string, withConfiguration: UIImage.SymbolConfiguration(weight: .regular))!
+        return image
+    }
+
     
     //MARK: - Subviews
     
     func subviewElements() {
-        let stack = UIStackView(arrangedSubviews: [temperatureLabel, humidityLabel, feelsLikeLabel, cityNameLabel])
+        let stack = UIStackView(arrangedSubviews: [temperatureLabel, humidityLabel, feelsLikeLabel, cityNameLabel, descriptionLabel])
         stack.axis = .vertical
         stack.spacing = 10
         view.addSubview(stack)
         stack.anchor(top: view.topAnchor, left: view.leftAnchor, paddingTop: 200, paddingLeft: 20)
+        
+        view.addSubview(conditionImageView)
+        conditionImageView.setDimensions(height: 30, width: 30)
+        conditionImageView.anchor(top: view.centerYAnchor, left: view.leftAnchor, paddingTop: 70, paddingLeft: 20)
+        conditionImageView.image?.withTintColor(.white)
 
     }
     

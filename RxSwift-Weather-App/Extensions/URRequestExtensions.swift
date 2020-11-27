@@ -16,7 +16,7 @@ struct Resource<T> {
 extension WeatherResult {
     
     static var empty: WeatherResult {
-        return WeatherResult(main: Weather(temp: 69, humidity: 69, feels_like: 69), name: "Empty")
+        return WeatherResult(main: Weather(temp: 0, humidity: 0, feels_like: 0), name: "Empty", weather: [Condition.init(id: 0, main: "Empty")] )
     }
 }
 
