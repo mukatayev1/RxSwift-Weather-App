@@ -39,16 +39,32 @@ class MainViewController: UIViewController {
     
     let temperatureLabel: UILabel = {
         let label = UILabel()
-        label.font = UIFont.systemFont(ofSize: 60, weight: .light)
-        label.textAlignment = .center
+        label.font = UIFont.systemFont(ofSize: 30, weight: .light)
+        label.textAlignment = .left
         label.textColor = .black
         return label
     }()
     
     let humidityLabel: UILabel = {
         let label = UILabel()
-        label.font = UIFont.systemFont(ofSize: 40, weight: .light)
-        label.textAlignment = .center
+        label.font = UIFont.systemFont(ofSize: 30, weight: .light)
+        label.textAlignment = .left
+        label.textColor = .black
+        return label
+    }()
+    
+    let cityNameLabel: UILabel = {
+        let label = UILabel()
+        label.font = UIFont.systemFont(ofSize: 30, weight: .light)
+        label.textAlignment = .left
+        label.textColor = .black
+        return label
+    }()
+    
+    let feelsLikeLabel: UILabel = {
+        let label = UILabel()
+        label.font = UIFont.systemFont(ofSize: 30, weight: .light)
+        label.textAlignment = .left
         label.textColor = .black
         return label
     }()
@@ -80,16 +96,15 @@ class MainViewController: UIViewController {
     //MARK: - Helpers
     
     private func displayWeather(_ weather: Weather?) {
-        
+
         if let weather = weather {
             self.temperatureLabel.text = "\(weather.temp) ℃"
-            print("Temperature: \(weather.temp)")
             self.humidityLabel.text = "\(weather.humidity) 💧"
-            print("Humidity: \(weather.humidity)")
-            
+            self.feelsLikeLabel.text = "\(weather.feels_like)"
         } else {
-            self.temperatureLabel.text = "☀︎"
-            self.humidityLabel.text = "☁︎"
+            self.temperatureLabel.text = "temp"
+            self.humidityLabel.text = "humidity"
+            self.feelsLikeLabel.text = "feels_like"
         }
     }
     
@@ -104,26 +119,32 @@ class MainViewController: UIViewController {
             .observeOn(MainScheduler.instance)
             .asDriver(onErrorJustReturn: WeatherResult.empty)
         
-        search.map {"\($0.main.temp)"}
+        search.map {"Temperature: \(Int($0.main.temp))"}
             .drive(self.temperatureLabel.rx.text)
             .disposed(by: disposeBag)
         
-        search.map {"\($0.main.humidity)"}
+        search.map {"Feels like: \(Int($0.main.feels_like))"}
+            .drive(self.feelsLikeLabel.rx.text)
+            .disposed(by: disposeBag)
+        
+        search.map {"Humidity: \(Int($0.main.humidity))"}
             .drive(self.humidityLabel.rx.text)
+            .disposed(by: disposeBag)
+        
+        search.map {"City: \($0.name)"}
+            .drive(self.cityNameLabel.rx.text)
             .disposed(by: disposeBag)
     }
     
     //MARK: - Subviews
     
     func subviewElements() {
-        //temperatureLabel
-        view.addSubview(temperatureLabel)
-        temperatureLabel.centerY(inView: view)
-        temperatureLabel.anchor(left: view.leftAnchor, right: view.rightAnchor, width: 60, height: 60)
-        
-        //cityNameLabel
-        view.addSubview(humidityLabel)
-        humidityLabel.anchor(top: temperatureLabel.bottomAnchor, left: view.leftAnchor, right: view.rightAnchor, paddingTop: 40, width: 60, height: 60)
+        let stack = UIStackView(arrangedSubviews: [temperatureLabel, humidityLabel, feelsLikeLabel, cityNameLabel])
+        stack.axis = .vertical
+        stack.spacing = 10
+        view.addSubview(stack)
+        stack.anchor(top: view.topAnchor, left: view.leftAnchor, paddingTop: 200, paddingLeft: 20)
+
     }
     
     func subviewSearchView() {
