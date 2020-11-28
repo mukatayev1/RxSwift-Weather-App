@@ -21,7 +21,6 @@ class MainViewController: UIViewController {
     let searchView: UIView = {
         let view = UIView()
         view.backgroundColor = .white
-        view.layer.cornerRadius = 10
         return view
     }()
     
@@ -37,6 +36,7 @@ class MainViewController: UIViewController {
         tf.placeholder = "Enter the city name"
         tf.backgroundColor = .white
         tf.returnKeyType = .search
+        tf.autocorrectionType = .no
         return tf
     }()
     
@@ -106,15 +106,32 @@ class MainViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
         setupGradientLayer(from: #colorLiteral(red: 0.2169692753, green: 0.6123354953, blue: 0.9305571089, alpha: 1), to: #colorLiteral(red: 0.8039215803, green: 0.8039215803, blue: 0.8039215803, alpha: 1), view: view)
+        setupLocationManager()
+        setupSearchTextField()
+        //Subviews
         setupBackView()
         subviewSearchView()
+        subviewCurrentLocation()
+        subviewTopElements()
+        subviewMiddleElements()
+    }
+    
+    override var preferredStatusBarStyle: UIStatusBarStyle {
+        return .lightContent
+    }
+    
+    //MARK: - Helpers
+    
+    func setupLocationManager() {
         locationManager.requestWhenInUseAuthorization()
         locationManager.delegate = self
         locationManager.requestLocation()
         locationManager.desiredAccuracy = kCLLocationAccuracyKilometer
-        
-        //temporary func
+    }
+    
+    func setupSearchTextField() {
         self.searchTextField.rx.controlEvent(.editingDidEndOnExit)
             .asObservable()
             .map { self.searchTextField.text }
@@ -129,28 +146,12 @@ class MainViewController: UIViewController {
                 }
             }).disposed(by: disposeBag)
         
-        //Subviews
-        subviewCurrentLocation()
-        subviewTopElements()
-        subviewMiddleElements()
-    }
-    
-    override var preferredStatusBarStyle: UIStatusBarStyle {
-        return .lightContent
-    }
-    
-    //MARK: - Helpers
-    
-    func setupBackView() {
-        view.addSubview(backView)
-        backView.anchor(top: view.topAnchor, left: view.leftAnchor, bottom: view.bottomAnchor, right: view.rightAnchor)
+        self.searchTextField.delegate = self
     }
     
     private func fetchWeather(by city: String) {
-        
         guard let cityEncoded = city.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed),
               let url = URL.urlForWeatherAPI(city: cityEncoded) else { return }
-        
         let resource = Resource<WeatherResult>(url: url)
         driveResults(with: resource)
     }
@@ -235,21 +236,11 @@ class MainViewController: UIViewController {
         }
     }
     
-    func setupGradientLayer(from topColor: UIColor, to bottomColor: UIColor, view: UIView) {
-        let gradient = CAGradientLayer()
-        gradient.colors = [topColor.cgColor, bottomColor.cgColor]
-        gradient.locations = [0, 1]
-        view.layer.addSublayer(gradient)
-        gradient.frame = view.frame
-    }
-    
     //MARK: - Subviews
     
-    func subviewConditionImageView() {
-        view.addSubview(conditionImageView)
-        conditionImageView.setDimensions(height: 70, width: 70)
-        conditionImageView.centerX(inView: view)
-        conditionImageView.anchor(top: view.centerYAnchor, paddingTop: 20)
+    func setupBackView() {
+        view.addSubview(backView)
+        backView.anchor(top: view.topAnchor, left: view.leftAnchor, bottom: view.bottomAnchor, right: view.rightAnchor)
     }
     
     func subviewSearchView() {

@@ -16,6 +16,7 @@
 		2B00611C256F8ED9002DB52A /* WeatherModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B00611B256F8ED9002DB52A /* WeatherModel.swift */; };
 		2B006120256F8FDF002DB52A /* URRequestExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B00611F256F8FDF002DB52A /* URRequestExtensions.swift */; };
 		2BB9403B256F9B820020E92B /* URLExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BB9403A256F9B820020E92B /* URLExtensions.swift */; };
+		2BF5DADC25729DC9009B85A3 /* WeatherManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BF5DADB25729DC9009B85A3 /* WeatherManager.swift */; };
 		3FF3D7026E9F374D80876221 /* Pods_RxSwift_Weather_App.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FEDC43B905EA1DCDAAF926FB /* Pods_RxSwift_Weather_App.framework */; };
 /* End PBXBuildFile section */
 
@@ -31,6 +32,7 @@
 		2B00611B256F8ED9002DB52A /* WeatherModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherModel.swift; sourceTree = "<group>"; };
 		2B00611F256F8FDF002DB52A /* URRequestExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URRequestExtensions.swift; sourceTree = "<group>"; };
 		2BB9403A256F9B820020E92B /* URLExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLExtensions.swift; sourceTree = "<group>"; };
+		2BF5DADB25729DC9009B85A3 /* WeatherManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherManager.swift; sourceTree = "<group>"; };
 		4EBF6235C542732210E1049D /* Pods-RxSwift-Weather-App.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RxSwift-Weather-App.debug.xcconfig"; path = "Target Support Files/Pods-RxSwift-Weather-App/Pods-RxSwift-Weather-App.debug.xcconfig"; sourceTree = "<group>"; };
 		C3515F716C6BBA55F6689A2F /* Pods-RxSwift-Weather-App.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RxSwift-Weather-App.release.xcconfig"; path = "Target Support Files/Pods-RxSwift-Weather-App/Pods-RxSwift-Weather-App.release.xcconfig"; sourceTree = "<group>"; };
 		FEDC43B905EA1DCDAAF926FB /* Pods_RxSwift_Weather_App.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_RxSwift_Weather_App.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -72,7 +74,6 @@
 				2B0060FB256F7D51002DB52A /* AppDelegate.swift */,
 				2B0060FD256F7D51002DB52A /* SceneDelegate.swift */,
 				2B00611A256F8E5A002DB52A /* Models */,
-				2BB940602570F38D0020E92B /* View */,
 				2BB94038256F96760020E92B /* Controllers */,
 				2B006123256F8FE8002DB52A /* Extensions */,
 				2B006104256F7D54002DB52A /* Assets.xcassets */,
@@ -86,6 +87,7 @@
 			isa = PBXGroup;
 			children = (
 				2B00611B256F8ED9002DB52A /* WeatherModel.swift */,
+				2BF5DADB25729DC9009B85A3 /* WeatherManager.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -106,13 +108,6 @@
 				2B0060FF256F7D51002DB52A /* MainViewController.swift */,
 			);
 			path = Controllers;
-			sourceTree = "<group>";
-		};
-		2BB940602570F38D0020E92B /* View */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = View;
 			sourceTree = "<group>";
 		};
 		E272EA00E48F475B4577CB7B /* Frameworks */ = {
@@ -247,6 +242,7 @@
 			files = (
 				2BB9403B256F9B820020E92B /* URLExtensions.swift in Sources */,
 				2B006100256F7D51002DB52A /* MainViewController.swift in Sources */,
+				2BF5DADC25729DC9009B85A3 /* WeatherManager.swift in Sources */,
 				2B006120256F8FDF002DB52A /* URRequestExtensions.swift in Sources */,
 				2B0060FC256F7D51002DB52A /* AppDelegate.swift in Sources */,
 				2B0060FE256F7D51002DB52A /* SceneDelegate.swift in Sources */,
