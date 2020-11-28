@@ -6,20 +6,24 @@
 //
 
 import UIKit
+import CoreLocation
 
-struct WeatherResult: Decodable {
+struct WeatherResult: Codable {
     let main: Weather
     let name: String
     let weather: [Condition]
+    let dt: TimeInterval
+    let timezone: Int
+    let coord: Coordinates
 }
 
-struct Weather: Decodable {
+struct Weather: Codable {
     let temp: Double
     let humidity: Double
     let feels_like: Double
 }
 
-struct Condition: Decodable {
+struct Condition: Codable {
     let id: Int
     let main: String
     var conditionName: String {
@@ -42,4 +46,9 @@ struct Condition: Decodable {
             return "cloud"
         }
     }
+}
+
+struct Coordinates: Codable {
+    let lat: CLLocationDegrees
+    let lon: CLLocationDegrees
 }

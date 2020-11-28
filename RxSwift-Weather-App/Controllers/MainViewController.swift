@@ -8,12 +8,15 @@
 import UIKit
 import RxSwift
 import RxCocoa
+import CoreLocation
 
 class MainViewController: UIViewController {
     
     //MARK: - Properties
     
     let disposeBag = DisposeBag()
+    let locationManager = CLLocationManager()
+    let backView = UIView()
     
     let searchView: UIView = {
         let view = UIView()
@@ -79,13 +82,25 @@ class MainViewController: UIViewController {
         return label
     }()
     
+    let timeLabel: UILabel = {
+        let label = UILabel()
+        label.font = UIFont.systemFont(ofSize: 30, weight: .light)
+        label.textAlignment = .left
+        label.textColor = .black
+        return label
+    }()
+    
     //MARK: - Lifecycle
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = #colorLiteral(red: 0.8039215803, green: 0.8039215803, blue: 0.8039215803, alpha: 1)
+        setupGradientLayer(from: #colorLiteral(red: 0.2169692753, green: 0.6123354953, blue: 0.9305571089, alpha: 1), to: #colorLiteral(red: 0.8039215803, green: 0.8039215803, blue: 0.8039215803, alpha: 1), view: view)
+        setupBackView()
         subviewElements()
         subviewSearchView()
+        locationManager.requestWhenInUseAuthorization()
+        locationManager.delegate = self
+        locationManager.requestLocation()
         
         //temporary func
         self.searchTextField.rx.controlEvent(.editingDidEndOnExit)
@@ -103,7 +118,16 @@ class MainViewController: UIViewController {
             }).disposed(by: disposeBag)
     }
     
+    override var preferredStatusBarStyle: UIStatusBarStyle {
+        return .lightContent
+    }
+    
     //MARK: - Helpers
+    
+    func setupBackView() {
+        view.addSubview(backView)
+        backView.anchor(top: view.topAnchor, left: view.leftAnchor, bottom: view.bottomAnchor, right: view.rightAnchor)
+    }
     
     private func displayWeather(_ weather: Weather?) {
 
@@ -124,6 +148,10 @@ class MainViewController: UIViewController {
               let url = URL.urlForWeatherAPI(city: cityEncoded) else { return }
         
         let resource = Resource<WeatherResult>(url: url)
+        driveResults(with: resource)
+    }
+    
+    func driveResults(with resource: Resource<WeatherResult>) {
         
         let search = URLRequest.load(resource: resource)
             .observeOn(MainScheduler.instance)
@@ -150,6 +178,12 @@ class MainViewController: UIViewController {
             .disposed(by: disposeBag)
         
         search.map { result in
+            self.getDate(unixTime: result.dt, timezone: result.timezone)
+        }
+        .drive(self.timeLabel.rx.text)
+        .disposed(by: disposeBag)
+        
+        search.map { result in
             self.getImage(string: result.weather[0].conditionName)
         }
         .drive(self.conditionImageView.rx.image)
@@ -160,12 +194,55 @@ class MainViewController: UIViewController {
         let image = UIImage(systemName: string, withConfiguration: UIImage.SymbolConfiguration(weight: .regular))!
         return image
     }
-
+    
+    func getDate(unixTime: TimeInterval, timezone: Int) -> String {
+        let usableDate = Date(timeIntervalSince1970: unixTime)
+        
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateStyle = .short
+        dateFormatter.timeStyle = .short
+        dateFormatter.timeZone = TimeZone(secondsFromGMT: timezone)
+        let dateString = dateFormatter.string(from: usableDate)
+        computeBackground(date: usableDate, timezone: timezone)
+        
+        return dateString
+    }
+    
+    func computeBackground(date: Date, timezone: Int) {
+        
+        var calendar = Calendar.current
+        calendar.timeZone = TimeZone(secondsFromGMT: timezone)!
+        let components = calendar.dateComponents([.hour], from: date)
+        let hour = components.hour!
+        
+        switch hour {
+        case 0...4:
+            setupGradientLayer(from: #colorLiteral(red: 0.1184060797, green: 0.1662106514, blue: 0.2781483531, alpha: 1), to: #colorLiteral(red: 0.2088660233, green: 0.2310087041, blue: 0.2752940655, alpha: 1), view: backView)
+        case 4...6:
+            setupGradientLayer(from: #colorLiteral(red: 0.2206433117, green: 0.2262730896, blue: 0.386420846, alpha: 1), to: #colorLiteral(red: 0.2640908148, green: 0.2718340007, blue: 0.3379205167, alpha: 1), view: backView)
+        case 6...18:
+            setupGradientLayer(from: #colorLiteral(red: 0.4208476245, green: 0.6470199227, blue: 0.7576511502, alpha: 1), to: #colorLiteral(red: 0.4279688895, green: 0.5533929467, blue: 0.620791018, alpha: 1), view: backView)
+        case 18...21:
+            setupGradientLayer(from: #colorLiteral(red: 0.521568656, green: 0.1098039225, blue: 0.05098039284, alpha: 1), to: #colorLiteral(red: 0.4427648783, green: 0.3130459588, blue: 0.2771662577, alpha: 1), view: backView)
+        case 21...23:
+            setupGradientLayer(from: #colorLiteral(red: 0.2206433117, green: 0.2262730896, blue: 0.386420846, alpha: 1), to: #colorLiteral(red: 0.2640908148, green: 0.2718340007, blue: 0.3379205167, alpha: 1), view: backView)
+        default:
+            setupGradientLayer(from: #colorLiteral(red: 0.1764705926, green: 0.4980392158, blue: 0.7568627596, alpha: 1), to: #colorLiteral(red: 0.501960814, green: 0.501960814, blue: 0.501960814, alpha: 1), view: backView)
+        }
+    }
+    
+    func setupGradientLayer(from topColor: UIColor, to bottomColor: UIColor, view: UIView) {
+        let gradient = CAGradientLayer()
+        gradient.colors = [topColor.cgColor, bottomColor.cgColor]
+        gradient.locations = [0, 1]
+        view.layer.addSublayer(gradient)
+        gradient.frame = view.frame
+    }
     
     //MARK: - Subviews
     
     func subviewElements() {
-        let stack = UIStackView(arrangedSubviews: [temperatureLabel, humidityLabel, feelsLikeLabel, cityNameLabel, descriptionLabel])
+        let stack = UIStackView(arrangedSubviews: [temperatureLabel, humidityLabel, feelsLikeLabel, cityNameLabel, descriptionLabel, timeLabel ])
         stack.axis = .vertical
         stack.spacing = 10
         view.addSubview(stack)
@@ -175,7 +252,7 @@ class MainViewController: UIViewController {
         conditionImageView.setDimensions(height: 30, width: 30)
         conditionImageView.anchor(top: view.centerYAnchor, left: view.leftAnchor, paddingTop: 70, paddingLeft: 20)
         conditionImageView.image?.withTintColor(.white)
-
+        
     }
     
     func subviewSearchView() {
@@ -196,6 +273,26 @@ class MainViewController: UIViewController {
     @objc func searchTapped() {
         fetchWeather(by: self.searchTextField.text ?? "")
     }
-    
 }
 
+//MARK: - CLLocationManagerDelegate
+
+extension MainViewController: CLLocationManagerDelegate {
+    
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        locationManager.stopUpdatingLocation()
+        if let location = locations.last {
+            
+            guard let latitudeString = String(location.coordinate.latitude).addingPercentEncoding(withAllowedCharacters: .urlHostAllowed),
+                  let longitudeString = String(location.coordinate.longitude).addingPercentEncoding(withAllowedCharacters: .urlHostAllowed),
+                  let url = URL.urlForWeatherAPICoordinates(lat: latitudeString, lon: longitudeString) else { return }
+            
+            let resource = Resource<WeatherResult>(url: url)
+            driveResults(with: resource)
+        }
+    }
+    
+    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        print(error)
+    }
+}
