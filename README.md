@@ -1,7 +1,7 @@
 # RxSwift-Weather-App
 A Weather app using RxSwift Framework and API Networking 
 
-<img src="https://user-images.githubusercontent.com/53441647/100519589-4b403f80-31dc-11eb-993d-4fd542c5824d.png" width="100" height="100">
+<img src="https://user-images.githubusercontent.com/53441647/100519969-98bdac00-31de-11eb-9b6e-5ee0632846a4.png" width="100" height="100">
 
 ## Table of contents
 * [Description](#description)
