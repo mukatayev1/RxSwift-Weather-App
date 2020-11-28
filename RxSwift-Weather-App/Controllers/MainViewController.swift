@@ -42,52 +42,64 @@ class MainViewController: UIViewController {
     
     let temperatureLabel: UILabel = {
         let label = UILabel()
-        label.font = UIFont.systemFont(ofSize: 30, weight: .light)
-        label.textAlignment = .left
-        label.textColor = .black
+        label.font = UIFont.systemFont(ofSize: 80, weight: .ultraLight)
+        label.textAlignment = .center
+        label.textColor = .white
         return label
     }()
     
     let humidityLabel: UILabel = {
         let label = UILabel()
-        label.font = UIFont.systemFont(ofSize: 30, weight: .light)
+        label.font = UIFont.systemFont(ofSize: 19, weight: .light)
         label.textAlignment = .left
-        label.textColor = .black
-        return label
-    }()
-    
-    let cityNameLabel: UILabel = {
-        let label = UILabel()
-        label.font = UIFont.systemFont(ofSize: 30, weight: .light)
-        label.textAlignment = .left
-        label.textColor = .black
+        label.textColor = .white
         return label
     }()
     
     let feelsLikeLabel: UILabel = {
         let label = UILabel()
-        label.font = UIFont.systemFont(ofSize: 30, weight: .light)
+        label.font = UIFont.systemFont(ofSize: 19, weight: .light)
         label.textAlignment = .left
-        label.textColor = .black
+        label.textColor = .white
         return label
     }()
     
-    let conditionImageView = UIImageView()
+    let cityNameLabel: UILabel = {
+        let label = UILabel()
+        label.font = UIFont.systemFont(ofSize: 45, weight: .light)
+        label.textAlignment = .center
+        label.textColor = .white
+        return label
+    }()
+    
+    let conditionImageView: UIImageView = {
+        let iv = UIImageView()
+        iv.tintColor = .white
+        return iv
+    }()
     
     let descriptionLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 30, weight: .light)
-        label.textAlignment = .left
-        label.textColor = .black
+        label.textAlignment = .center
+        label.textColor = .white
         return label
     }()
     
     let timeLabel: UILabel = {
         let label = UILabel()
-        label.font = UIFont.systemFont(ofSize: 30, weight: .light)
-        label.textAlignment = .left
-        label.textColor = .black
+        label.font = UIFont.systemFont(ofSize: 18, weight: .light)
+        label.textAlignment = .center
+        label.textColor = .white
         return label
+    }()
+    
+    let currentLocationButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setImage(UIImage(systemName: "location.circle.fill", withConfiguration: UIImage.SymbolConfiguration(pointSize: 35, weight: .light)), for: .normal)
+        button.tintColor = .white
+        button.addTarget(self, action: #selector(currentLocationTapped), for: .touchUpInside)
+        return button
     }()
     
     //MARK: - Lifecycle
@@ -96,11 +108,11 @@ class MainViewController: UIViewController {
         super.viewDidLoad()
         setupGradientLayer(from: #colorLiteral(red: 0.2169692753, green: 0.6123354953, blue: 0.9305571089, alpha: 1), to: #colorLiteral(red: 0.8039215803, green: 0.8039215803, blue: 0.8039215803, alpha: 1), view: view)
         setupBackView()
-        subviewElements()
         subviewSearchView()
         locationManager.requestWhenInUseAuthorization()
         locationManager.delegate = self
         locationManager.requestLocation()
+        locationManager.desiredAccuracy = kCLLocationAccuracyKilometer
         
         //temporary func
         self.searchTextField.rx.controlEvent(.editingDidEndOnExit)
@@ -110,12 +122,17 @@ class MainViewController: UIViewController {
                 
                 if let cityName = cityName {
                     if cityName.isEmpty {
-                        self.displayWeather(nil)
+                        self.currentLocationTapped()
                     } else {
                         self.fetchWeather(by: cityName)
                     }
                 }
             }).disposed(by: disposeBag)
+        
+        //Subviews
+        subviewCurrentLocation()
+        subviewTopElements()
+        subviewMiddleElements()
     }
     
     override var preferredStatusBarStyle: UIStatusBarStyle {
@@ -127,19 +144,6 @@ class MainViewController: UIViewController {
     func setupBackView() {
         view.addSubview(backView)
         backView.anchor(top: view.topAnchor, left: view.leftAnchor, bottom: view.bottomAnchor, right: view.rightAnchor)
-    }
-    
-    private func displayWeather(_ weather: Weather?) {
-
-        if let weather = weather {
-            self.temperatureLabel.text = "\(weather.temp) ℃"
-            self.humidityLabel.text = "\(weather.humidity) 💧"
-            self.feelsLikeLabel.text = "\(weather.feels_like)"
-        } else {
-            self.temperatureLabel.text = "temp"
-            self.humidityLabel.text = "humidity"
-            self.feelsLikeLabel.text = "feels_like"
-        }
     }
     
     private func fetchWeather(by city: String) {
@@ -157,23 +161,23 @@ class MainViewController: UIViewController {
             .observeOn(MainScheduler.instance)
             .asDriver(onErrorJustReturn: WeatherResult.empty)
         
-        search.map {"Temperature: \(Int($0.main.temp))"}
+        search.map {" \(Int($0.main.temp))°"}
             .drive(self.temperatureLabel.rx.text)
             .disposed(by: disposeBag)
         
-        search.map {"Feels like: \(Int($0.main.feels_like))"}
+        search.map {"Feels like: \(Int($0.main.feels_like))°"}
             .drive(self.feelsLikeLabel.rx.text)
             .disposed(by: disposeBag)
         
-        search.map {"Humidity: \(Int($0.main.humidity))"}
+        search.map {"Humidity: \(Int($0.main.humidity))%"}
             .drive(self.humidityLabel.rx.text)
             .disposed(by: disposeBag)
         
-        search.map {"City: \($0.name)"}
+        search.map {"\($0.name)"}
             .drive(self.cityNameLabel.rx.text)
             .disposed(by: disposeBag)
         
-        search.map {"Description: \($0.weather[0].main)"}
+        search.map {"\($0.weather[0].main)"}
             .drive(self.descriptionLabel.rx.text)
             .disposed(by: disposeBag)
         
@@ -191,7 +195,7 @@ class MainViewController: UIViewController {
     }
     
     func getImage(string: String) -> UIImage {
-        let image = UIImage(systemName: string, withConfiguration: UIImage.SymbolConfiguration(weight: .regular))!
+        let image = UIImage(systemName: string, withConfiguration: UIImage.SymbolConfiguration(pointSize: 85, weight: .ultraLight))!
         return image
     }
     
@@ -199,10 +203,10 @@ class MainViewController: UIViewController {
         let usableDate = Date(timeIntervalSince1970: unixTime)
         
         let dateFormatter = DateFormatter()
-        dateFormatter.dateStyle = .short
+        dateFormatter.dateStyle = .none
         dateFormatter.timeStyle = .short
         dateFormatter.timeZone = TimeZone(secondsFromGMT: timezone)
-        let dateString = dateFormatter.string(from: usableDate)
+        let dateString = "Local time: \(dateFormatter.string(from: usableDate))"
         computeBackground(date: usableDate, timezone: timezone)
         
         return dateString
@@ -241,23 +245,16 @@ class MainViewController: UIViewController {
     
     //MARK: - Subviews
     
-    func subviewElements() {
-        let stack = UIStackView(arrangedSubviews: [temperatureLabel, humidityLabel, feelsLikeLabel, cityNameLabel, descriptionLabel, timeLabel ])
-        stack.axis = .vertical
-        stack.spacing = 10
-        view.addSubview(stack)
-        stack.anchor(top: view.topAnchor, left: view.leftAnchor, paddingTop: 200, paddingLeft: 20)
-        
+    func subviewConditionImageView() {
         view.addSubview(conditionImageView)
-        conditionImageView.setDimensions(height: 30, width: 30)
-        conditionImageView.anchor(top: view.centerYAnchor, left: view.leftAnchor, paddingTop: 70, paddingLeft: 20)
-        conditionImageView.image?.withTintColor(.white)
-        
+        conditionImageView.setDimensions(height: 70, width: 70)
+        conditionImageView.centerX(inView: view)
+        conditionImageView.anchor(top: view.centerYAnchor, paddingTop: 20)
     }
     
     func subviewSearchView() {
         view.addSubview(searchView)
-        searchView.anchor(top: view.safeAreaLayoutGuide.topAnchor, left: view.leftAnchor, right: view.rightAnchor, paddingTop: 70, paddingLeft: 50, paddingRight: 50, height: 40)
+        searchView.anchor(top: view.safeAreaLayoutGuide.topAnchor, left: view.leftAnchor, right: view.rightAnchor, paddingTop: 30, paddingLeft: 30, paddingRight: 30, height: 40)
         
         //search textfield
         view.addSubview(searchTextField)
@@ -268,10 +265,58 @@ class MainViewController: UIViewController {
         searchButton.anchor(top: searchView.topAnchor, left: searchTextField.rightAnchor, bottom: searchView.bottomAnchor, right: searchView.rightAnchor, paddingRight: 5)
     }
     
+    func subviewTopElements() {
+        //humidityLabel + feelsLikeLabel
+        let stack = UIStackView(arrangedSubviews: [humidityLabel, feelsLikeLabel])
+        stack.axis = .horizontal
+        view.addSubview(stack)
+        stack.anchor(top: searchTextField.bottomAnchor, left: view.leftAnchor, right: view.rightAnchor, paddingTop: 20, paddingLeft: 40, paddingRight: 40)
+        
+        //cityNameLabel
+        view.addSubview(cityNameLabel)
+        cityNameLabel.anchor(top: stack.bottomAnchor, paddingTop: 25)
+        cityNameLabel.centerX(inView: view)
+        
+        //timeLabel
+        view.addSubview(timeLabel)
+        timeLabel.anchor(top: cityNameLabel.bottomAnchor, paddingTop: 5)
+        timeLabel.centerX(inView: view)
+    }
+    
+    func subviewMiddleElements() {
+        //descriptionLabel
+        view.addSubview(descriptionLabel)
+        descriptionLabel.anchor(top: timeLabel.bottomAnchor, paddingTop: 40)
+        descriptionLabel.centerX(inView: view)
+        
+        //temperatureLabel
+        view.addSubview(temperatureLabel)
+        temperatureLabel.anchor(top: descriptionLabel.bottomAnchor, paddingTop: 5)
+        temperatureLabel.centerX(inView: view)
+        
+        //conditionImageView
+        view.addSubview(conditionImageView)
+        conditionImageView.anchor(top: temperatureLabel.bottomAnchor, paddingTop: 12)
+        conditionImageView.centerX(inView: view)
+    }
+    
+    func subviewCurrentLocation() {
+        view.addSubview(currentLocationButton)
+        currentLocationButton.anchor(bottom: view.safeAreaLayoutGuide.bottomAnchor, paddingBottom: 20)
+        currentLocationButton.centerX(inView: view)
+    }
+    
     //MARK: - Selectors
     
     @objc func searchTapped() {
         fetchWeather(by: self.searchTextField.text ?? "")
+        searchTextField.text = ""
+        searchTextField.resignFirstResponder()
+    }
+    
+    @objc func currentLocationTapped() {
+        locationManager.requestLocation()
+        searchTextField.text = ""
     }
 }
 
@@ -294,5 +339,14 @@ extension MainViewController: CLLocationManagerDelegate {
     
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
         print(error)
+    }
+}
+
+//MARK: - UITextFieldDelegate
+
+extension MainViewController: UITextFieldDelegate {
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        searchTextField.text = ""
+        return true
     }
 }

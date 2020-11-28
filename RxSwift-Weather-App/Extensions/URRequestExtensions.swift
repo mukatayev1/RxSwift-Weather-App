@@ -16,7 +16,7 @@ struct Resource<T> {
 extension WeatherResult {
     
     static var empty: WeatherResult {
-        return WeatherResult(main: Weather(temp: 0, humidity: 0, feels_like: 0), name: "Empty", weather: [Condition.init(id: 0, main: "Empty")], dt: TimeInterval(0), timezone: 0, coord: Coordinates(lat: 0, lon: 0) )
+        return WeatherResult(main: Weather(temp: 0, humidity: 0, feels_like: 0), name: "Couldn't find the city", weather: [Condition.init(id: 0, main: "")], dt: TimeInterval(0), timezone: 0, coord: Coordinates(lat: 0, lon: 0) )
     }
 }
 

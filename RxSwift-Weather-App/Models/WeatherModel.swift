@@ -43,7 +43,7 @@ struct Condition: Codable {
         case 801...804:
             return "cloud.bolt"
         default:
-            return "cloud"
+            return "exclamationmark.circle"
         }
     }
 }
