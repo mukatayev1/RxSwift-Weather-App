@@ -13,9 +13,9 @@ A Weather app using RxSwift Framework and API Networking
 ## Description
 A Weather List app created using RxSwift, Networking(JSON parsing & URLSession) and UIKit
 ### How it works:
-* Open the app and instantly get the weather of your current location
-* Enter name of the city, which weather you want to see
-* Tap the location button to get current location's weather
+* User instantly gets current weather of his/her current location, when he/she opens the app
+* User can search any city and get the detailed weather information of the city he/she searched for.
+* User can get current location's weather by just tapping "location" button at the bottom of the screen.
 
 ## Features
 * RxSwift Framework
