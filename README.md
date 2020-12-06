@@ -16,6 +16,7 @@ A Weather List app created using RxSwift, Networking(JSON parsing & URLSession) 
 * User instantly gets current weather of his/her current location, when he/she opens the app
 * User can search any city and get the detailed weather information of the city he/she searched for.
 * User can get current location's weather by just tapping "location" button at the bottom of the screen.
+### See the video: [YouTube Link](https://youtu.be/lFCWp15kG8A)
 
 ## Features
 * RxSwift Framework
